@@ -1,0 +1,9 @@
+*.o
+*.ko
+*.mod
+*.mod.c
+*.cmd
+.*.cmd
+Module.symvers
+modules.order
+!nftl/aml_nftl_core_20141222.o

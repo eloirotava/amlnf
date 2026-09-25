@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 
 #ifndef NAND_H_INCLUDED
 #define NAND_H_INCLUDED
@@ -5,36 +6,36 @@
 #include "amlnf_dev.h"
 
 #ifndef AML_NAND_UBOOT
-#include <mach/io.h>
+#include "amlnf_compat.h"
 #endif
 
 #ifdef CONFIG_NAND_AML_M8
-#define 	NAND_CYCLE_DELAY				84
+#define	NAND_CYCLE_DELAY				84
 #else
-#define 	NAND_SYS_CLK_NAME	  			"clk81"
-#define 	NAND_CYCLE_DELAY				90
+#define	NAND_SYS_CLK_NAME				"clk81"
+#define	NAND_CYCLE_DELAY				90
 #endif
 
 #ifdef AML_NAND_UBOOT
 
-#define AMLNF_WRITE_REG(reg, val) 					(*(volatile unsigned *(reg)) = (val))
-#define AMLNF_READ_REG(reg) 						(*(volatile unsigned *(reg)))
-#define AMLNF_WRITE_REG_BITS(reg, val, start, len) 	AMLNF_WRITE_REG(reg, (AMLNF_READ_REG(reg) & \
-														~((( 1L << (_len) )-1) << (_start)) \
-														| ((unsigned)((_value)&((1L<<(_len))-1)) << (_start))))
+#define AMLNF_WRITE_REG(reg, val)					(*(volatile unsigned int *(reg)) = (val))
+#define AMLNF_READ_REG(reg)						(*(volatile unsigned int *(reg)))
+#define AMLNF_WRITE_REG_BITS(reg, val, start, len)	AMLNF_WRITE_REG(reg, (AMLNF_READ_REG(reg) & \
+														~(((1L << (_len))-1) << (_start)) \
+														| ((unsigned int)((_value)&((1L<<(_len))-1)) << (_start))))
 
-//#define AMLNF_READ_REG_BITS(reg, start, len) 	(((__raw_readl(reg) >> (start)) & ((1L<<(len))-1)))
-//#define AMLNF_CLEAR_REG_MASK(reg, mask)   			(clrbits_le32(reg, (mask)))
-#define AMLNF_SET_REG_MASK(reg, mask)     			AMLNF_WRITE_REG(reg, AMLNF_READ_REG(reg) | (mask))
-#define AMLNF_CLEAR_REG_MASK(reg, mask) 				AMLNF_WRITE_REG(reg, AMLNF_READ_REG(reg) & (~mask))
+//#define AMLNF_READ_REG_BITS(reg, start, len)	(((__raw_readl(reg) >> (start)) & ((1L<<(len))-1)))
+//#define AMLNF_CLEAR_REG_MASK(reg, mask)			(clrbits_le32(reg, (mask)))
+#define AMLNF_SET_REG_MASK(reg, mask)			AMLNF_WRITE_REG(reg, AMLNF_READ_REG(reg) | (mask))
+#define AMLNF_CLEAR_REG_MASK(reg, mask)				AMLNF_WRITE_REG(reg, AMLNF_READ_REG(reg) & (~mask))
 #else
 
-#define AMLNF_WRITE_REG(reg, val) 					(aml_write_reg32(reg, (val)))
-#define AMLNF_READ_REG(reg) 						(aml_read_reg32(reg))
-#define AMLNF_WRITE_REG_BITS(reg, val, start, len) 	(aml_set_reg32_bits(reg, (val),start,len))
-//#define AMLNF_READ_REG_BITS(bus,reg, start, len) 	(aml_get_reg32_bits(reg,start,len))
-#define AMLNF_CLEAR_REG_MASK(reg, mask)   			(aml_clr_reg32_mask(reg, (mask)))
-#define AMLNF_SET_REG_MASK(reg, mask)     			(aml_set_reg32_mask(reg, (mask)))
+#define AMLNF_WRITE_REG(reg, val)					(aml_write_reg32(reg, (val)))
+#define AMLNF_READ_REG(reg)						(aml_read_reg32(reg))
+#define AMLNF_WRITE_REG_BITS(reg, val, start, len)	(aml_set_reg32_bits(reg, (val), start, len))
+//#define AMLNF_READ_REG_BITS(bus,reg, start, len)	(aml_get_reg32_bits(reg,start,len))
+#define AMLNF_CLEAR_REG_MASK(reg, mask)			(aml_clr_reg32_mask(reg, (mask)))
+#define AMLNF_SET_REG_MASK(reg, mask)			(aml_set_reg32_mask(reg, (mask)))
 
 #endif
 
@@ -57,9 +58,7 @@ extern int amlnf_allow_markbad;
 extern int amlnf_allow_meta;
 extern int amlnf_use_cache;
 extern char amlnf_parts[64];
-void amlnf_refuse_write(const char *what, unsigned int page);
-int amlnf_refused_count(void);
-bool amlnf_part_enabled(const char *name);
+#include "amlnf_glue.h"
 
 #ifdef CONFIG_NAND_AML_M8
 #define P_NAND_BASE IO_NAND_BASE
@@ -90,148 +89,148 @@ bool amlnf_part_enabled(const char *name);
 #define NFC_SET_CORE_PLL(a) do { (void)(a); } while (0)
 #endif
 
-#define NAND_IO_ADDR	 		P_NAND_BUF
+#define NAND_IO_ADDR			P_NAND_BUF
 
-#define NFC_SET_TIMING(mode,cycles,adjust)              		AMLNF_WRITE_REG_BITS(P_NAND_CFG,((cycles)|((adjust&0xf)<<10)|((mode&7)<<5)),0,14)
-#define NFC_SET_CMD_START()						   				AMLNF_SET_REG_MASK(P_NAND_CFG,1<<12)
-#define NFC_SET_CMD_AUTO()						   				AMLNF_SET_REG_MASK(P_NAND_CFG,1<<13)
-#define NFC_SET_STS_IRQ(en)					       				AMLNF_WRITE_REG_BITS(P_NAND_CFG,en,20,1)
-#define NFC_SET_CMD_IRQ(en)					       				AMLNF_WRITE_REG_BITS(P_NAND_CFG,en,21,1)
-#define NFC_SET_TIMING_ASYC(bus_tim,bus_cyc)       				AMLNF_WRITE_REG_BITS(P_NAND_CFG,((bus_cyc&31)|((bus_tim&31)<<5)|(0<<10)),0,12)
-#define NFC_SET_TIMING_SYNC(bus_tim,bus_cyc,sync_mode)  		AMLNF_WRITE_REG_BITS(P_NAND_CFG,(bus_cyc&31)|((bus_tim&31)<<5)|((sync_mode&2)<<10),0,12)
+#define NFC_SET_TIMING(mode, cycles, adjust)			AMLNF_WRITE_REG_BITS(P_NAND_CFG, ((cycles)|((adjust&0xf)<<10)|((mode&7)<<5)), 0, 14)
+#define NFC_SET_CMD_START()										AMLNF_SET_REG_MASK(P_NAND_CFG, 1<<12)
+#define NFC_SET_CMD_AUTO()										AMLNF_SET_REG_MASK(P_NAND_CFG, 1<<13)
+#define NFC_SET_STS_IRQ(en)									AMLNF_WRITE_REG_BITS(P_NAND_CFG, en, 20, 1)
+#define NFC_SET_CMD_IRQ(en)									AMLNF_WRITE_REG_BITS(P_NAND_CFG, en, 21, 1)
+#define NFC_SET_TIMING_ASYC(bus_tim, bus_cyc)				AMLNF_WRITE_REG_BITS(P_NAND_CFG, ((bus_cyc&31)|((bus_tim&31)<<5)|(0<<10)), 0, 12)
+#define NFC_SET_TIMING_SYNC(bus_tim, bus_cyc, sync_mode)		AMLNF_WRITE_REG_BITS(P_NAND_CFG, (bus_cyc&31)|((bus_tim&31)<<5)|((sync_mode&2)<<10), 0, 12)
 #define NFC_SET_TIMING_SYNC_ADJUST()
-#define NFC_SET_DMA_MODE(is_apb,spare_only)             		AMLNF_WRITE_REG_BITS(P_NAND_CFG,((spare_only<<1)|(is_apb)),14,2)
-#define NFC_SET_OOB_MODE(mode)						AMLNF_SET_REG_MASK(P_NAND_CFG,mode);
-#define NFC_CLR_OOB_MODE(mode)						AMLNF_CLEAR_REG_MASK(P_NAND_CFG,mode);
+#define NFC_SET_DMA_MODE(is_apb, spare_only)			AMLNF_WRITE_REG_BITS(P_NAND_CFG, ((spare_only<<1)|(is_apb)), 14, 2)
+#define NFC_SET_OOB_MODE(mode)						AMLNF_SET_REG_MASK(P_NAND_CFG, mode);
+#define NFC_CLR_OOB_MODE(mode)						AMLNF_CLEAR_REG_MASK(P_NAND_CFG, mode);
 
-#define NFC_ENABLE_STS_IRQ()      							AMLNF_SET_REG_MASK(P_NAND_CFG,1<<20)
-#define NFC_DISABLE_STS_IRQ()      							AMLNF_CLEAR_REG_MASK(P_NAND_CFG,1<<20)
+#define NFC_ENABLE_STS_IRQ()							AMLNF_SET_REG_MASK(P_NAND_CFG, 1<<20)
+#define NFC_DISABLE_STS_IRQ()							AMLNF_CLEAR_REG_MASK(P_NAND_CFG, 1<<20)
 
-#define NFC_ENABLE_IO_IRQ()      							AMLNF_SET_REG_MASK(P_NAND_CFG,1<<21)
-#define NFC_DISABLE_IO_IRQ()      							AMLNF_CLEAR_REG_MASK(P_NAND_CFG,1<<21)
-
-/**
-    Register Operation and Controller Status
-*/
-#define NFC_SEND_CMD(cmd)           			(AMLNF_WRITE_REG(P_NAND_CMD,cmd))
-#define NFC_READ_INFO()             				(AMLNF_READ_REG(P_NAND_CMD))
+#define NFC_ENABLE_IO_IRQ()							AMLNF_SET_REG_MASK(P_NAND_CFG, 1<<21)
+#define NFC_DISABLE_IO_IRQ()							AMLNF_CLEAR_REG_MASK(P_NAND_CFG, 1<<21)
 
 /**
-    ADDR operations
+	Register Operation and Controller Status
 */
-#define NFC_SET_DADDR(a)         				(AMLNF_WRITE_REG(P_NAND_DADR,(unsigned)a))
-#define NFC_SET_IADDR(a)         				(AMLNF_WRITE_REG(P_NAND_IADR,(unsigned)a))
-#define NFC_SET_SADDR(a)		 			(AMLNF_WRITE_REG(P_NAND_SADR,(unsigned)a))
+#define NFC_SEND_CMD(cmd)				(AMLNF_WRITE_REG(P_NAND_CMD, cmd))
+#define NFC_READ_INFO()					(AMLNF_READ_REG(P_NAND_CMD))
 
-#define NFC_INFO_GET()                      					(AMLNF_READ_REG(P_NAND_CMD))
+/**
+	ADDR operations
+*/
+#define NFC_SET_DADDR(a)					(AMLNF_WRITE_REG(P_NAND_DADR, (unsigned int)a))
+#define NFC_SET_IADDR(a)					(AMLNF_WRITE_REG(P_NAND_IADR, (unsigned int)a))
+#define NFC_SET_SADDR(a)					(AMLNF_WRITE_REG(P_NAND_SADR, (unsigned int)a))
 
-#define NFC_GET_BUF() 					    			AMLNF_READ_REG(P_NAND_BUF)
-#define NFC_SET_CFG(val) 			      				(AMLNF_WRITE_REG(P_NAND_CFG,(unsigned)val))
+#define NFC_INFO_GET()							(AMLNF_READ_REG(P_NAND_CMD))
+
+#define NFC_GET_BUF()								AMLNF_READ_REG(P_NAND_BUF)
+#define NFC_SET_CFG(val)							(AMLNF_WRITE_REG(P_NAND_CFG, (unsigned int)val))
 
 /*
    Common Nand Read Flow
 */
-#define CE0         					(0xe<<10)
-#define CE1         					(0xd<<10)
-#define CE2         					(0xb<<10)
-#define CE3         					(0x7<<10)
-#define CE_NOT_SEL  			(0xf<<10)
-#define IO4 						((0xe<<10)|(1<<18))
-#define IO5 						((0xd<<10)|(1<<18))
-#define IO6 						((0xb<<10)|(1<<18))
-#define CLE         					(0x5<<14)
-#define ALE         					(0x6<<14)
-#define DWR         				(0x4<<14)
-#define DRD         					(0x8<<14)
-#define IDLE        					(0xc<<14)
-#define RB  						(1<<20)
-#define STANDBY     				(0xf<<10)
+#define CE0						(0xe<<10)
+#define CE1						(0xd<<10)
+#define CE2						(0xb<<10)
+#define CE3						(0x7<<10)
+#define CE_NOT_SEL			(0xf<<10)
+#define IO4						((0xe<<10)|(1<<18))
+#define IO5						((0xd<<10)|(1<<18))
+#define IO6						((0xb<<10)|(1<<18))
+#define CLE						(0x5<<14)
+#define ALE						(0x6<<14)
+#define DWR					(0x4<<14)
+#define DRD						(0x8<<14)
+#define IDLE						(0xc<<14)
+#define RB						(1<<20)
+#define STANDBY				(0xf<<10)
 
-#define M2N  					((0<<17) | (2<<20) | (1<<19))
-#define N2M  					((1<<17) | (2<<20) | (1<<19))
+#define M2N					((0<<17) | (2<<20) | (1<<19))
+#define N2M					((1<<17) | (2<<20) | (1<<19))
 
-#define M2N_NORAN  			0x00200000
-#define N2M_NORAN  			0x00220000
+#define M2N_NORAN			0x00200000
+#define N2M_NORAN			0x00220000
 
-#define STS  						((3<<17) | (2<<20))
-#define ADL  						((0<<16) | (3<<20))
-#define ADH  					((1<<16) | (3<<20))
-#define AIL  						((2<<16) | (3<<20))
-#define AIH 						((3<<16) | (3<<20))
-#define ASL  						((4<<16) | (3<<20))
-#define ASH  						((5<<16) | (3<<20))
-#define SEED 					((8<<16) | (3<<20))
+#define STS						((3<<17) | (2<<20))
+#define ADL						((0<<16) | (3<<20))
+#define ADH					((1<<16) | (3<<20))
+#define AIL						((2<<16) | (3<<20))
+#define AIH						((3<<16) | (3<<20))
+#define ASL						((4<<16) | (3<<20))
+#define ASH						((5<<16) | (3<<20))
+#define SEED					((8<<16) | (3<<20))
 
 #define SEED_OFFSET			0xc2
 
 /**
-    Nand Flash Controller (M1)
-    Global Macros
+	Nand Flash Controller (M1)
+	Global Macros
 */
 /**
    Config Group
 */
 
 /**
-    CMD relative Macros
-    Shortage word . NFCC
+	CMD relative Macros
+	Shortage word . NFCC
 */
-#define NFC_CMD_IDLE(ce,time)          			((ce)|IDLE|(time&0x3ff))
-#define NFC_CMD_CLE(ce,cmd  )          			((ce)|CLE |(cmd &0x0ff))
-#define NFC_CMD_ALE(ce,addr )          			((ce)|ALE |(addr&0x0ff))
-#define NFC_CMD_STANDBY(time)          		(STANDBY  |(time&0x3ff))
-#define NFC_CMD_ADL(addr)              			(ADL     |(addr&0xffff))
-#define NFC_CMD_ADH(addr)              			(ADH|((addr>>16)&0xffff))
-#define NFC_CMD_AIL(addr)              			(AIL     |(addr&0xffff))
-#define NFC_CMD_AIH(addr)              			(AIH|((addr>>16)&0xffff))
-#define NFC_CMD_DWR(ce, data)              		(ce|DWR |(data&0xff  ))
-#define NFC_CMD_DRD(ce,size)           			(ce|DRD|size)
-#define NFC_CMD_RB(ce,time )          			((ce)|RB  |(time&0x1f))
-#define NFC_CMD_RB_INT(ce,time)        		((ce)|RB|(((ce>>10)^0xf)<<14)|(time&0x1f))
-#define NFC_CMD_RBIO(time,io)		   		(RB|io|(time&0x1f))
-#define NFC_CMD_RBIO_IRQ(time)		   		(RB|IO6|(1<<16)|(time&0x1f))
-#define NFC_CMD_RBIO_INT(io,time)      		(RB|(((io>>10)^0x7)<<14)|(time&0x1f))
-#define NFC_CMD_SEED(seed)			   		(SEED|(SEED_OFFSET + (seed&0x7fff)))
-#define NFC_CMD_STS(tim) 			   		(STS|(tim&3))
-#define NFC_CMD_M2N(ran,ecc,sho,pgsz,pag)      	((ran?M2N:M2N_NORAN)|(ecc<<14)|(sho<<13)|((pgsz&0x7f)<<6)|(pag&0x3f))
-#define NFC_CMD_N2M(ran,ecc,sho,pgsz,pag)      	((ran?N2M:N2M_NORAN)|(ecc<<14)|(sho<<13)|((pgsz&0x7f)<<6)|(pag&0x3f))
+#define NFC_CMD_IDLE(ce, time)				((ce)|IDLE|(time&0x3ff))
+#define NFC_CMD_CLE(ce, cmd)				((ce)|CLE | (cmd & 0x0ff))
+#define NFC_CMD_ALE(ce, addr)				((ce)|ALE | (addr&0x0ff))
+#define NFC_CMD_STANDBY(time)			(STANDBY | (time&0x3ff))
+#define NFC_CMD_ADL(addr)				(ADL | (addr&0xffff))
+#define NFC_CMD_ADH(addr)				(ADH|((addr>>16)&0xffff))
+#define NFC_CMD_AIL(addr)				(AIL | (addr&0xffff))
+#define NFC_CMD_AIH(addr)				(AIH|((addr>>16)&0xffff))
+#define NFC_CMD_DWR(ce, data)			(ce|DWR | (data&0xff))
+#define NFC_CMD_DRD(ce, size)				(ce|DRD|size)
+#define NFC_CMD_RB(ce, time)				((ce)|RB | (time&0x1f))
+#define NFC_CMD_RB_INT(ce, time)			((ce)|RB|(((ce>>10)^0xf)<<14)|(time&0x1f))
+#define NFC_CMD_RBIO(time, io)				(RB|io|(time&0x1f))
+#define NFC_CMD_RBIO_IRQ(time)				(RB|IO6|(1<<16)|(time&0x1f))
+#define NFC_CMD_RBIO_INT(io, time)		(RB|(((io>>10)^0x7)<<14)|(time&0x1f))
+#define NFC_CMD_SEED(seed)					(SEED|(SEED_OFFSET + (seed&0x7fff)))
+#define NFC_CMD_STS(tim)					(STS|(tim&3))
+#define NFC_CMD_M2N(ran, ecc, sho, pgsz, pag)	((ran?M2N:M2N_NORAN)|(ecc<<14)|(sho<<13)|((pgsz&0x7f)<<6)|(pag&0x3f))
+#define NFC_CMD_N2M(ran, ecc, sho, pgsz, pag)	((ran?N2M:N2M_NORAN)|(ecc<<14)|(sho<<13)|((pgsz&0x7f)<<6)|(pag&0x3f))
 
 /**
-    Alias for CMD
+	Alias for CMD
 */
-#define NFC_CMD_D_ADR(addr)         			NFC_CMD_ADL(addr),NFC_CMD_ADH(addr)
-#define NFC_CMD_I_ADR(addr)         			NFC_CMD_ADI(addr),NFC_CMD_ADI(addr)
+#define NFC_CMD_D_ADR(addr)				NFC_CMD_ADL(addr), NFC_CMD_ADH(addr)
+#define NFC_CMD_I_ADR(addr)				NFC_CMD_ADI(addr), NFC_CMD_ADI(addr)
 
 
 #ifdef CONFIG_NAND_AML_M8
-#define NAND_ECC_NONE            				(0x0)
-#define NAND_ECC_BCH8             				(0x1)
-#define NAND_ECC_BCH8_1K          			(0x2)
-#define NAND_ECC_BCH16_1K         			(0x3)
-#define NAND_ECC_BCH24_1K         			(0x3)
-#define NAND_ECC_BCH30_1K 		  		(0x4)
-#define NAND_ECC_BCH40_1K 		  		(0x5)
-#define NAND_ECC_BCH50_1K 		  		(0x6)
-#define NAND_ECC_BCH60_1K 		  		(0x7)
-#define NAND_ECC_BCH_SHORT		  		(0x8)
+#define NAND_ECC_NONE					(0x0)
+#define NAND_ECC_BCH8					(0x1)
+#define NAND_ECC_BCH8_1K				(0x2)
+#define NAND_ECC_BCH16_1K				(0x3)
+#define NAND_ECC_BCH24_1K				(0x3)
+#define NAND_ECC_BCH30_1K				(0x4)
+#define NAND_ECC_BCH40_1K				(0x5)
+#define NAND_ECC_BCH50_1K				(0x6)
+#define NAND_ECC_BCH60_1K				(0x7)
+#define NAND_ECC_BCH_SHORT				(0x8)
 #else
-#define NAND_ECC_NONE            				(0x0)
-#define NAND_ECC_BCH8             				(0x1)
-#define NAND_ECC_BCH8_1K          			(0x2)
-#define NAND_ECC_BCH16_1K         			(0x3)
-#define NAND_ECC_BCH24_1K         			(0x4)
-#define NAND_ECC_BCH30_1K 		  		(0x5)
-#define NAND_ECC_BCH40_1K 		  		(0x6)
-#define NAND_ECC_BCH50_1K 		  		(0x6)
-#define NAND_ECC_BCH60_1K 		  		(0x7)
-#define NAND_ECC_BCH_SHORT		  		(0x8)
+#define NAND_ECC_NONE					(0x0)
+#define NAND_ECC_BCH8					(0x1)
+#define NAND_ECC_BCH8_1K				(0x2)
+#define NAND_ECC_BCH16_1K				(0x3)
+#define NAND_ECC_BCH24_1K				(0x4)
+#define NAND_ECC_BCH30_1K				(0x5)
+#define NAND_ECC_BCH40_1K				(0x6)
+#define NAND_ECC_BCH50_1K				(0x6)
+#define NAND_ECC_BCH60_1K				(0x7)
+#define NAND_ECC_BCH_SHORT				(0x8)
 #endif
 
 /**
-    Send command directly
+	Send command directly
 */
 
-//#define NFC_SEND_CMD_IDLE(ce,time)          				NFC_SEND_CMD(NFC_CMD_IDLE(ce,time))
+//#define NFC_SEND_CMD_IDLE(ce,time)					NFC_SEND_CMD(NFC_CMD_IDLE(ce,time))
 /*
  * Bounded FIFO wait.  The vendor wrote these as "while (NFC_CMDFIFO_SIZE());"
  * with no way out, which is fine when the controller is known good and fatal
@@ -249,46 +248,46 @@ bool amlnf_part_enabled(const char *name);
 		; \
 } while (0)
 
-#define NFC_SEND_CMD_IDLE(ce,time) do { \
+#define NFC_SEND_CMD_IDLE(ce, time) do { \
 	NFC_WAIT_FIFO_EMPTY(); \
-	NFC_SEND_CMD(NFC_CMD_IDLE(ce,time)); \
+	NFC_SEND_CMD(NFC_CMD_IDLE(ce, time)); \
 } while (0)
-#define NFC_SEND_CMD_CLE(ce,cmd  )         		 		NFC_SEND_CMD(NFC_CMD_CLE(ce,cmd))
-#define NFC_SEND_CMD_ALE(ce,addr )          				NFC_SEND_CMD(NFC_CMD_ALE(ce,addr))
-#define NFC_SEND_CMD_STANDBY(time)          				NFC_SEND_CMD(NFC_CMD_STANDBY(time))
-#define NFC_SEND_CMD_ADL(addr)              				NFC_SEND_CMD(NFC_CMD_ADL(addr))
-#define NFC_SEND_CMD_ADH(addr)              				NFC_SEND_CMD(NFC_CMD_ADH(addr))
-#define NFC_SEND_CMD_AIL(addr)              					NFC_SEND_CMD(NFC_CMD_AIL(addr))
-#define NFC_SEND_CMD_AIH(addr)              					NFC_SEND_CMD(NFC_CMD_AIH(addr))
-#define NFC_SEND_CMD_DWR(ce,data)             	 			NFC_SEND_CMD(NFC_CMD_DWR(ce,data))
-#define NFC_SEND_CMD_DRD(ce,size)           				NFC_SEND_CMD(NFC_CMD_DRD(ce,size))
-#define NFC_SEND_CMD_RB(ce,time)          					NFC_SEND_CMD(NFC_CMD_RB(ce,time))
+#define NFC_SEND_CMD_CLE(ce, cmd)					NFC_SEND_CMD(NFC_CMD_CLE(ce, cmd))
+#define NFC_SEND_CMD_ALE(ce, addr)					NFC_SEND_CMD(NFC_CMD_ALE(ce, addr))
+#define NFC_SEND_CMD_STANDBY(time)					NFC_SEND_CMD(NFC_CMD_STANDBY(time))
+#define NFC_SEND_CMD_ADL(addr)					NFC_SEND_CMD(NFC_CMD_ADL(addr))
+#define NFC_SEND_CMD_ADH(addr)					NFC_SEND_CMD(NFC_CMD_ADH(addr))
+#define NFC_SEND_CMD_AIL(addr)						NFC_SEND_CMD(NFC_CMD_AIL(addr))
+#define NFC_SEND_CMD_AIH(addr)						NFC_SEND_CMD(NFC_CMD_AIH(addr))
+#define NFC_SEND_CMD_DWR(ce, data)					NFC_SEND_CMD(NFC_CMD_DWR(ce, data))
+#define NFC_SEND_CMD_DRD(ce, size)					NFC_SEND_CMD(NFC_CMD_DRD(ce, size))
+#define NFC_SEND_CMD_RB(ce, time)						NFC_SEND_CMD(NFC_CMD_RB(ce, time))
 #define NFC_SEND_CMD_SEED(seed)						NFC_SEND_CMD(NFC_CMD_SEED(seed))
-#define NFC_SEND_CMD_M2N(ran,ecc,sho,pgsz,pag)   		NFC_SEND_CMD(NFC_CMD_M2N(ran,ecc,sho,pgsz,pag))
-#define NFC_SEND_CMD_N2M(ran,ecc,sho,pgsz,pag)   		NFC_SEND_CMD(NFC_CMD_N2M(ran,ecc,sho,pgsz,pag))
+#define NFC_SEND_CMD_M2N(ran, ecc, sho, pgsz, pag)		NFC_SEND_CMD(NFC_CMD_M2N(ran, ecc, sho, pgsz, pag))
+#define NFC_SEND_CMD_N2M(ran, ecc, sho, pgsz, pag)		NFC_SEND_CMD(NFC_CMD_N2M(ran, ecc, sho, pgsz, pag))
 
-#define NFC_SEND_CMD_M2N_RAW(ran,len)				NFC_SEND_CMD((ran?M2N:M2N_NORAN)|(len&0x3fff))
-#define NFC_SEND_CMD_N2M_RAW(ran,len)   				NFC_SEND_CMD((ran?N2M:N2M_NORAN)|(len&0x3fff))
+#define NFC_SEND_CMD_M2N_RAW(ran, len)				NFC_SEND_CMD((ran?M2N:M2N_NORAN)|(len&0x3fff))
+#define NFC_SEND_CMD_N2M_RAW(ran, len)				NFC_SEND_CMD((ran?N2M:N2M_NORAN)|(len&0x3fff))
 
-#define NFC_SEND_CMD_STS(time, irq)          				NFC_SEND_CMD(NFC_CMD_STS(time |irq))
+#define NFC_SEND_CMD_STS(time, irq)					NFC_SEND_CMD(NFC_CMD_STS(time | irq))
 
-#define NFC_SEND_CMD_RB_IRQ(time)          				NFC_SEND_CMD(NFC_CMD_RBIO_IRQ(time))
+#define NFC_SEND_CMD_RB_IRQ(time)					NFC_SEND_CMD(NFC_CMD_RBIO_IRQ(time))
 
 /**
-    Cmd Info Macros
+	Cmd Info Macros
 */
-#define NFC_CMDFIFO_SIZE()                  				((NFC_INFO_GET()>>22)&0x1f)
-#define NFC_CHECEK_RB_TIMEOUT()             			((NFC_INFO_GET()>>27)&0x1)
-#define NFC_GET_RB_STATUS(ce)               				(((NFC_INFO_GET()>>28)&(~(ce>>10)))&0xf)
-#define NFC_FIFO_CUR_CMD()				    		((NFC_INFO_GET()>>22)&0x3FFFFF)
+#define NFC_CMDFIFO_SIZE()						((NFC_INFO_GET()>>22)&0x1f)
+#define NFC_CHECEK_RB_TIMEOUT()				((NFC_INFO_GET()>>27)&0x1)
+#define NFC_GET_RB_STATUS(ce)					(((NFC_INFO_GET()>>28)&(~(ce>>10)))&0xf)
+#define NFC_FIFO_CUR_CMD()						((NFC_INFO_GET()>>22)&0x3FFFFF)
 
 
-#define NAND_INFO_DONE(a)         						(((a)>>31)&1)
-#define NAND_ECC_ENABLE(a)       	 				(((a)>>30)&1)
-#define NAND_ECC_CNT(a)           						(((a)>>24)&0x3f)
-#define NAND_ZERO_CNT(a)	      						(((a)>>16)&0x3f)
-#define NAND_INFO_DATA_2INFO(a)   					((a)&0xffff)
-#define NAND_INFO_DATA_1INFO(a)   					((a)&0xff)
+#define NAND_INFO_DONE(a)							(((a)>>31)&1)
+#define NAND_ECC_ENABLE(a)					(((a)>>30)&1)
+#define NAND_ECC_CNT(a)							(((a)>>24)&0x3f)
+#define NAND_ZERO_CNT(a)							(((a)>>16)&0x3f)
+#define NAND_INFO_DATA_2INFO(a)					((a)&0xffff)
+#define NAND_INFO_DATA_1INFO(a)					((a)&0xff)
 
 #define POR_CONFIG									READ_CBUS_REG(ASSIST_POR_CONFIG)
 

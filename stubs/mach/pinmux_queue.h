@@ -1,3 +1,0 @@
-#ifndef _STUB_MACH_PINMUX_QUEUE_H
-#define _STUB_MACH_PINMUX_QUEUE_H
-#endif

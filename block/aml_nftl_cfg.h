@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 
 #include "aml_nftl_type.h"
 #include "../include/amlnf_cfg.h"
@@ -23,14 +24,14 @@
 #define GC_THRESHOLD_RATIO_NUMERATOR              2
 #define GC_THRESHOLD_RATIO_DENOMINATOR            3
 
-#define MAX_CACHE_WRITE_NUM  				      4
+#define MAX_CACHE_WRITE_NUM				      4
 #define NFTL_CACHE_FLUSH_SYNC                      1
 
 
-extern uint32 aml_nftl_get_part_cap(void * _part);
-extern void aml_nftl_set_part_test(void * _part,uint32 test);
-extern void* aml_nftl_get_part_priv(void * _part);
-extern void aml_nftl_add_part_total_write(void * _part);
-extern void aml_nftl_add_part_total_read(void * _part);
-extern uint16 aml_nftl_get_part_write_cache_nums(void * _part);
+extern uint32 aml_nftl_get_part_cap(void *_part);
+extern void aml_nftl_set_part_test(void *_part, uint32 test);
+extern void *aml_nftl_get_part_priv(void *_part);
+extern void aml_nftl_add_part_total_write(void *_part);
+extern void aml_nftl_add_part_total_read(void *_part);
+extern uint16 aml_nftl_get_part_write_cache_nums(void *_part);
 

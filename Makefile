@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-2.0
-obj-m := amlnf_m3.o
+obj-m := amlnf.o
 
-amlnf_m3-y := \
+amlnf-y := \
 	shims.o \
 	nfc_map.o \
 	phy/amlnand_init.o \
@@ -25,10 +25,10 @@ amlnf_m3-y := \
 	block/aml_nftl_block.o \
 	nftl/aml_nftl_core_20141222.o
 
-ccflags-y := -I$(src)/include -I$(src)/stubs -I$(src)/stubs/linux -I$(src)/ntd -I$(src)/block
-ccflags-y += -Wno-error -Wno-unused -Wno-declaration-after-statement
-ccflags-y += -Wno-missing-prototypes -Wno-missing-declarations
-ccflags-y += -DAML_NAND_NEW_OOB
+# The FTL object was built with 4-byte wchar_t; it never passes one across.
+ldflags-y += --no-wchar-size-warning
+
+ccflags-y := -I$(src)/include -I$(src)/ntd -I$(src)/block
 
 KDIR ?= /lib/modules/$(shell uname -r)/build
 ARCH ?= arm

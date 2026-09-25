@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
 /*
  * Simple NTD partitioning layer
  *
@@ -31,7 +32,7 @@
 
 #include "aml_ntd.h"
 
-int add_ntd_partitions(struct amlnand_phydev* master);
+int add_ntd_partitions(struct amlnand_phydev *master);
 
 extern int aml_ntd_nftl_flush(struct ntd_info *ntd);
 
@@ -49,28 +50,28 @@ static DEFINE_MUTEX(ntd_partitions_mutex);
 *****************************************************************************/
 static int read_page_with_oob(struct ntd_info *ntd, uint32_t page, u_char *oob_buf, u_char *buf)
 {
-    int ret;
-    //unsigned int temp;
-    uint64_t byte_addr;
-    struct amlnand_phydev* nand_dev = (struct amlnand_phydev*)ntd->priv;
+	int ret;
+	//unsigned int temp;
+	uint64_t byte_addr;
+	struct amlnand_phydev *nand_dev = (struct amlnand_phydev *)ntd->priv;
 		//printk("1111read_page_with_oob : %x %d\n", page, p);
 		//int *u = p;
 		//int i;
 		//for(i=0; i<4; i++){
 		//	printk("*p[%d]=%d\n",i,*(u+i));
 		//}
-    byte_addr = page;
-    byte_addr <<= ntd->pagesize_shift;
+	byte_addr = page;
+	byte_addr <<= ntd->pagesize_shift;
 
-    nand_dev->ops.mode = NAND_HW_ECC;
-    nand_dev->ops.addr = byte_addr;
-    nand_dev->ops.len = ntd->pagesize;
-    nand_dev->ops.retlen = 0;
-    nand_dev->ops.ooblen = ntd->oobsize;
-    nand_dev->ops.datbuf = buf;
-    nand_dev->ops.oobbuf = oob_buf;
+	nand_dev->ops.mode = NAND_HW_ECC;
+	nand_dev->ops.addr = byte_addr;
+	nand_dev->ops.len = ntd->pagesize;
+	nand_dev->ops.retlen = 0;
+	nand_dev->ops.ooblen = ntd->oobsize;
+	nand_dev->ops.datbuf = buf;
+	nand_dev->ops.oobbuf = oob_buf;
 
-    ret = nand_dev->read(nand_dev);
+	ret = nand_dev->read(nand_dev);
    // for( i=0; i<4; i++){
 	//		printk("*p[%d]=%d\n",i,*(u+i));
 	//	}
@@ -89,23 +90,23 @@ static int read_page_with_oob(struct ntd_info *ntd, uint32_t page, u_char *oob_b
 *****************************************************************************/
 static int read_only_oob(struct ntd_info *ntd, u_int32_t page, u_char *oob_buf)
 {
-    int ret;
-    //unsigned int temp;
-    uint64_t byte_addr;
-    struct amlnand_phydev* nand_dev = (struct amlnand_phydev*)ntd->priv;
+	int ret;
+	//unsigned int temp;
+	uint64_t byte_addr;
+	struct amlnand_phydev *nand_dev = (struct amlnand_phydev *)ntd->priv;
 
-    byte_addr = page;
-    byte_addr <<= ntd->pagesize_shift;
+	byte_addr = page;
+	byte_addr <<= ntd->pagesize_shift;
 
-    nand_dev->ops.mode = NAND_HW_ECC;
-    nand_dev->ops.addr = byte_addr;
-    nand_dev->ops.len = ntd->pagesize;
-    nand_dev->ops.retlen = 0;
-    nand_dev->ops.ooblen = ntd->oobsize;
-    nand_dev->ops.datbuf = NULL;
-    nand_dev->ops.oobbuf = oob_buf;
+	nand_dev->ops.mode = NAND_HW_ECC;
+	nand_dev->ops.addr = byte_addr;
+	nand_dev->ops.len = ntd->pagesize;
+	nand_dev->ops.retlen = 0;
+	nand_dev->ops.ooblen = ntd->oobsize;
+	nand_dev->ops.datbuf = NULL;
+	nand_dev->ops.oobbuf = oob_buf;
 
-    ret = nand_dev->read(nand_dev);
+	ret = nand_dev->read(nand_dev);
 
 	return ret;
 }
@@ -119,23 +120,23 @@ static int read_only_oob(struct ntd_info *ntd, u_int32_t page, u_char *oob_buf)
 *****************************************************************************/
 static int write_page_with_oob(struct ntd_info *ntd, uint32_t page, u_char *oob_buf, u_char *buf)
 {
-    int ret;
-    //unsigned int temp;
-    uint64_t byte_addr;
-    struct amlnand_phydev* nand_dev = (struct amlnand_phydev*)ntd->priv;
+	int ret;
+	//unsigned int temp;
+	uint64_t byte_addr;
+	struct amlnand_phydev *nand_dev = (struct amlnand_phydev *)ntd->priv;
 
-    byte_addr = page;
-    byte_addr <<= ntd->pagesize_shift;
+	byte_addr = page;
+	byte_addr <<= ntd->pagesize_shift;
 
-    nand_dev->ops.mode = NAND_HW_ECC;
-    nand_dev->ops.addr = byte_addr;
-    nand_dev->ops.len = ntd->pagesize;
-    nand_dev->ops.retlen = 0;
-    nand_dev->ops.ooblen = ntd->oobsize;
-    nand_dev->ops.datbuf = buf;
-    nand_dev->ops.oobbuf = oob_buf;
+	nand_dev->ops.mode = NAND_HW_ECC;
+	nand_dev->ops.addr = byte_addr;
+	nand_dev->ops.len = ntd->pagesize;
+	nand_dev->ops.retlen = 0;
+	nand_dev->ops.ooblen = ntd->oobsize;
+	nand_dev->ops.datbuf = buf;
+	nand_dev->ops.oobbuf = oob_buf;
 
-    ret = nand_dev->write(nand_dev);
+	ret = nand_dev->write(nand_dev);
 
 	return ret;
 }
@@ -149,29 +150,22 @@ static int write_page_with_oob(struct ntd_info *ntd, uint32_t page, u_char *oob_
 *****************************************************************************/
 static int part_erase(struct ntd_info *ntd, uint32_t block)
 {
-    uint64_t byte_addr;
-    struct amlnand_phydev* nand_dev = (struct amlnand_phydev*)ntd->priv;
+	uint64_t byte_addr;
+	struct amlnand_phydev *nand_dev = (struct amlnand_phydev *)ntd->priv;
 
-    byte_addr = block;
-    byte_addr <<= ntd->blocksize_shift;
+	byte_addr = block;
+	byte_addr <<= ntd->blocksize_shift;
 
-    nand_dev->ops.mode = NAND_HW_ECC;
-    nand_dev->ops.addr = byte_addr;
-    nand_dev->ops.len = ntd->blocksize;
-    nand_dev->ops.retlen = 0;
-    nand_dev->ops.ooblen = 0;
-    nand_dev->ops.datbuf = NULL;
-    nand_dev->ops.oobbuf = NULL;
+	nand_dev->ops.mode = NAND_HW_ECC;
+	nand_dev->ops.addr = byte_addr;
+	nand_dev->ops.len = ntd->blocksize;
+	nand_dev->ops.retlen = 0;
+	nand_dev->ops.ooblen = 0;
+	nand_dev->ops.datbuf = NULL;
+	nand_dev->ops.oobbuf = NULL;
 
-    return nand_dev->erase(nand_dev);
+	return nand_dev->erase(nand_dev);
 }
-
-
-void ntd_erase_callback(struct ntd_info *ntd, uint32_t from)
-{
-
-}
-EXPORT_SYMBOL_GPL(ntd_erase_callback);
 
 
 /*****************************************************************************
@@ -183,23 +177,23 @@ EXPORT_SYMBOL_GPL(ntd_erase_callback);
 *****************************************************************************/
 static int part_block_isbad(struct ntd_info *ntd, uint32_t block)
 {
-    int ret;
-    uint64_t byte_addr;
-    struct amlnand_phydev* nand_dev = (struct amlnand_phydev*)ntd->priv;
+	int ret;
+	uint64_t byte_addr;
+	struct amlnand_phydev *nand_dev = (struct amlnand_phydev *)ntd->priv;
 
-    byte_addr = block;
-    byte_addr <<= ntd->blocksize_shift;
+	byte_addr = block;
+	byte_addr <<= ntd->blocksize_shift;
 
-    nand_dev->ops.mode = NAND_HW_ECC;
-    nand_dev->ops.addr = byte_addr;
-    nand_dev->ops.len = ntd->blocksize;
-    nand_dev->ops.retlen = 0;
-    nand_dev->ops.ooblen = 0;
-    nand_dev->ops.datbuf = NULL;
-    nand_dev->ops.oobbuf = NULL;
+	nand_dev->ops.mode = NAND_HW_ECC;
+	nand_dev->ops.addr = byte_addr;
+	nand_dev->ops.len = ntd->blocksize;
+	nand_dev->ops.retlen = 0;
+	nand_dev->ops.ooblen = 0;
+	nand_dev->ops.datbuf = NULL;
+	nand_dev->ops.oobbuf = NULL;
 
-    ret = nand_dev->block_isbad(nand_dev);
-    return ret;
+	ret = nand_dev->block_isbad(nand_dev);
+	return ret;
 }
 
 /*****************************************************************************
@@ -211,22 +205,22 @@ static int part_block_isbad(struct ntd_info *ntd, uint32_t block)
 *****************************************************************************/
 static int part_block_markbad(struct ntd_info *ntd, uint32_t block)
 {
-    int ret;
-    uint64_t byte_addr;
-    struct amlnand_phydev* nand_dev = (struct amlnand_phydev*)ntd->priv;
+	int ret;
+	uint64_t byte_addr;
+	struct amlnand_phydev *nand_dev = (struct amlnand_phydev *)ntd->priv;
 
-    byte_addr = block;
-    byte_addr <<= ntd->blocksize_shift;
+	byte_addr = block;
+	byte_addr <<= ntd->blocksize_shift;
 
-    nand_dev->ops.mode = NAND_HW_ECC;
-    nand_dev->ops.addr = byte_addr;
-    nand_dev->ops.len = ntd->blocksize;
-    nand_dev->ops.retlen = 0;
-    nand_dev->ops.ooblen = 0;
-    nand_dev->ops.datbuf = NULL;
-    nand_dev->ops.oobbuf = NULL;
+	nand_dev->ops.mode = NAND_HW_ECC;
+	nand_dev->ops.addr = byte_addr;
+	nand_dev->ops.len = ntd->blocksize;
+	nand_dev->ops.retlen = 0;
+	nand_dev->ops.ooblen = 0;
+	nand_dev->ops.datbuf = NULL;
+	nand_dev->ops.oobbuf = NULL;
 
-    ret = nand_dev->block_markbad(nand_dev);
+	ret = nand_dev->block_markbad(nand_dev);
 
 	return ret;
 }
@@ -240,22 +234,23 @@ static int part_block_markbad(struct ntd_info *ntd, uint32_t block)
 *****************************************************************************/
 static int part_suspend(struct ntd_info *ntd)
 {
-	struct amlnand_phydev* phy;
+	struct amlnand_phydev *phy;
 	int ret = 0;
+
 	phy = ntd->priv;
 
 
-	if(phy == NULL){
-		printk("%s : get phy dev failed\n",__func__);
+	if (phy == NULL) {
+		printk("%s : get phy dev failed\n", __func__);
 		return 0;
 	}
 	ret = phy->suspend(phy);
-	if(ret){
-		printk("part_suspend %s  failed!!!\n",phy->name);
+	if (ret) {
+		printk("part_suspend %s  failed!!!\n", phy->name);
 	}
-	printk("part_suspend %s\n",phy->name);
+	printk("part_suspend %s\n", phy->name);
 
-    return ret;
+	return ret;
 }
 
 /*****************************************************************************
@@ -267,18 +262,18 @@ static int part_suspend(struct ntd_info *ntd)
 *****************************************************************************/
 static void part_resume(struct ntd_info *ntd)
 {
-	struct amlnand_phydev* phy;
+	struct amlnand_phydev *phy;
 	//int ret = 0;
 	phy = ntd->priv;
-	if(phy == NULL){
-		printk("%s : get phy dev failed\n",__func__);
-		return ;
+	if (phy == NULL) {
+		printk("%s : get phy dev failed\n", __func__);
+		return;
 	}
 	 phy->resume(phy);
 
-	printk("part_resume %s\n",phy->name);
+	printk("part_resume %s\n", phy->name);
 
-	return ;
+	return;
 }
 
 /*****************************************************************************
@@ -290,8 +285,8 @@ static void part_resume(struct ntd_info *ntd)
 *****************************************************************************/
 static int part_flush(struct ntd_info *ntd)
 {
-    printk("part_flush\n");
-    return 0;
+	printk("part_flush\n");
+	return 0;
 }
 
 /*****************************************************************************
@@ -315,7 +310,7 @@ static inline void free_partition(struct ntd_info *p)
 *Return       :
 *Note         :
 *****************************************************************************/
-int del_ntd_partitions(struct amlnand_phydev* master)
+int del_ntd_partitions(struct amlnand_phydev *master)
 {
 	struct ntd_info *slave, *next;
 	int ret, err = 0;
@@ -323,7 +318,7 @@ int del_ntd_partitions(struct amlnand_phydev* master)
 	mutex_lock(&ntd_partitions_mutex);
 
 	list_for_each_entry_safe(slave, next, &ntd_partitions, list)
-        if ((slave->name != NULL)&&(slave->priv == (void*)master)) {
+	if ((slave->name != NULL) && (slave->priv == (void *)master)) {
 			ret = del_ntd_device(slave);
 			if (ret < 0) {
 				err = ret;
@@ -344,23 +339,6 @@ int del_ntd_partitions(struct amlnand_phydev* master)
 *Return       :
 *Note         :
 *****************************************************************************/
-void print_ntd(struct ntd_info *ntd)
-{
-    printk("ntd->name %s \n",ntd->name);
-    printk("ntd->offset %llx \n",ntd->offset);
-    printk("ntd->flags %lx \n",ntd->flags);
-    printk("ntd->size %llx \n",ntd->size);
-    printk("ntd->blocksize %ld \n",ntd->blocksize);
-    printk("ntd->pagesize %ld \n",ntd->pagesize);
-    printk("ntd->oobsize %ld \n",ntd->oobsize);
-    printk("ntd->blocksize_shift %ld \n",ntd->blocksize_shift);
-    printk("ntd->pagesize_shift %ld \n",ntd->pagesize_shift);
-    printk("ntd->blocksize_mask %ld \n",ntd->blocksize_mask);
-    printk("ntd->pagesize_mask %ld \n",ntd->pagesize_mask);
-    printk("ntd->index %ld \n",ntd->index);
-
-}
-
 /*****************************************************************************
 *Name         :
 *Description  :
@@ -368,20 +346,20 @@ void print_ntd(struct ntd_info *ntd)
 *Return       :
 *Note         :
 *****************************************************************************/
-static struct ntd_info *allocate_partition(struct amlnand_phydev* master)
+static struct ntd_info *allocate_partition(struct amlnand_phydev *master)
 {
 	struct ntd_info *slave;
 	char *name;
 
-    uint32_t block = 0;
+	uint32_t block = 0;
 
-    uint32_t block_num = 0;
+	uint32_t block_num = 0;
 	/* allocate the partition structure */
 	slave = kzalloc(sizeof(*slave), GFP_KERNEL);
 	//name = kstrdup(part->name, GFP_KERNEL);
 	name = kstrdup(master->name, GFP_KERNEL);
 	if (!name || !slave) {
-		printk(KERN_ERR"memory allocation error while creating partitions for \"%s\"\n",master->name);
+		printk(KERN_ERR"memory allocation error while creating partitions for \"%s\"\n", master->name);
 		kfree(name);
 		kfree(slave);
 		return ERR_PTR(-ENOMEM);
@@ -405,16 +383,16 @@ static struct ntd_info *allocate_partition(struct amlnand_phydev* master)
 
 	slave->read_page_with_oob = read_page_with_oob;
 	slave->write_page_with_oob = write_page_with_oob;
-    slave->read_only_oob = read_only_oob;
+	slave->read_only_oob = read_only_oob;
 
-    slave->block_isbad = part_block_isbad;
-    slave->block_markbad = part_block_markbad;
+	slave->block_isbad = part_block_isbad;
+	slave->block_markbad = part_block_markbad;
 
-    slave->suspend = part_suspend;
-    slave->resume = part_resume;
-    slave->flush = part_flush;
-    slave->get_device = NULL;
-    slave->put_device = NULL;
+	slave->suspend = part_suspend;
+	slave->resume = part_resume;
+	slave->flush = part_flush;
+	slave->get_device = NULL;
+	slave->put_device = NULL;
 
 	slave->erase = part_erase;
 	slave->priv = master;
@@ -427,25 +405,25 @@ static struct ntd_info *allocate_partition(struct amlnand_phydev* master)
 		/* FIXME: Let it be writable if it is on a boundary of
 		 * _minor_ erase size though */
 		slave->flags &= ~NTD_WRITEABLE;
-		printk(KERN_WARNING"ntd: partition \"%s\" doesn't start on an erase block boundary -- force read-only\n",slave->name);
+		printk(KERN_WARNING"ntd: partition \"%s\" doesn't start on an erase block boundary -- force read-only\n", slave->name);
 	}
 
-	if ((slave->flags & NTD_WRITEABLE) &&ntd_mod_by_eb(slave->size, slave)) {
+	if ((slave->flags & NTD_WRITEABLE) && ntd_mod_by_eb(slave->size, slave)) {
 		slave->flags &= ~NTD_WRITEABLE;
-		printk(KERN_WARNING"ntd: partition \"%s\" doesn't end on an erase block -- force read-only\n",slave->name);
+		printk(KERN_WARNING"ntd: partition \"%s\" doesn't end on an erase block -- force read-only\n", slave->name);
 	}
 
 	//print_ntd(slave);
 
-    block_num = (uint32_t)(slave->size >> slave->blocksize_shift);
-    printk("block_num %d \n",block_num);
-    do{
-        if (slave->block_isbad(slave,block)){
-            slave->badblocks++;
-        }
-        block++;
-        block_num--;
-    }while(block_num != 0);
+	block_num = (uint32_t)(slave->size >> slave->blocksize_shift);
+	printk("block_num %d\n", block_num);
+	do {
+	if (slave->block_isbad(slave, block)) {
+			slave->badblocks++;
+	}
+	block++;
+	block_num--;
+	} while (block_num != 0);
 
 //out_register:
 	return slave;
@@ -458,7 +436,7 @@ static struct ntd_info *allocate_partition(struct amlnand_phydev* master)
 *Return       :
 *Note         :
 *****************************************************************************/
-int add_ntd_partitions(struct amlnand_phydev* master)
+int add_ntd_partitions(struct amlnand_phydev *master)
 {
 	struct ntd_info *slave;
 	//uint64_t cur_offset = 0;
@@ -469,16 +447,16 @@ int add_ntd_partitions(struct amlnand_phydev* master)
 //	if(master->size > 0xc0000000)
 //	    master->size = 0xc0000000;
 
-    slave = allocate_partition(master);
-    if (IS_ERR(slave)){
-        return PTR_ERR(slave);
-    }
+	slave = allocate_partition(master);
+	if (IS_ERR(slave)) {
+	return PTR_ERR(slave);
+	}
 
-    mutex_lock(&ntd_partitions_mutex);
-    list_add(&slave->list, &ntd_partitions);
-    mutex_unlock(&ntd_partitions_mutex);
+	mutex_lock(&ntd_partitions_mutex);
+	list_add(&slave->list, &ntd_partitions);
+	mutex_unlock(&ntd_partitions_mutex);
 
-    add_ntd_device(slave);
+	add_ntd_device(slave);
 
 //    add_ntd_device(slave);
 

@@ -17,6 +17,7 @@
 #include <linux/kthread.h>
 #include <linux/delay.h>
 
+#include "amlnf_glue.h"
 #include "aml_ntd.h"
 
 static LIST_HEAD(ntd_blktrans_majors);
@@ -170,7 +171,7 @@ static void ntd_blktrans_work(struct ntd_blktrans_dev *dev)
 static void ntd_blktrans_work_fn(struct work_struct *w)
 {
 	struct ntd_blktrans_dev *dev = container_of(w, struct ntd_blktrans_dev,
-						    work);
+													work);
 
 	spin_lock_irq(&dev->queue_lock);
 	ntd_blktrans_work(dev);
@@ -380,7 +381,7 @@ added:
 	if (ret)
 		goto err_disk;
 
-	pr_info("amlnf_m3: added disk /dev/%s size=%lu sectors\n",
+	pr_info("amlnf: added disk /dev/%s size=%lu sectors\n",
 		gd->disk_name, new->size);
 	return 0;
 
@@ -410,7 +411,7 @@ int register_ntd_blktrans(struct ntd_blktrans_ops *tr)
 	struct ntd_info *ntd;
 	int ret;
 
-	pr_info("amlnf_m3: register_ntd_blktrans %s\n", tr->name);
+	pr_debug("amlnf: register_ntd_blktrans %s\n", tr->name);
 	mutex_lock(&ntd_table_mutex);
 	ret = register_blkdev(tr->major, tr->name);
 	if (ret < 0) {
@@ -425,7 +426,7 @@ int register_ntd_blktrans(struct ntd_blktrans_ops *tr)
 	INIT_LIST_HEAD(&tr->devs);
 	list_add(&tr->list, &ntd_blktrans_majors);
 	ntd_for_each_device(ntd) {
-		pr_info("amlnf_m3: add_ntd for %s\n", ntd->name);
+		pr_debug("amlnf: add_ntd for %s\n", ntd->name);
 		tr->add_ntd(tr, ntd);
 	}
 	mutex_unlock(&ntd_table_mutex);
@@ -445,11 +446,5 @@ int deregister_ntd_blktrans(struct ntd_blktrans_ops *tr)
 	return 0;
 }
 
-EXPORT_SYMBOL(register_ntd_blktrans);
-EXPORT_SYMBOL(deregister_ntd_blktrans);
-EXPORT_SYMBOL(add_ntd_blktrans_dev);
-EXPORT_SYMBOL(del_ntd_blktrans_dev);
-EXPORT_SYMBOL(amlnf_class_register);
-EXPORT_SYMBOL(amlnf_ktime_get_ts);
 
 MODULE_LICENSE("GPL");

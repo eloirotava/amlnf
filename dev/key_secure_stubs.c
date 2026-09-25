@@ -5,14 +5,14 @@
 int aml_key_init(struct amlnand_chip *aml_chip)
 {
 	(void)aml_chip;
-	pr_info("amlnf_m3: aml_key_init stub\n");
+	pr_debug("amlnf: aml_key_init stub\n");
 	return 0;
 }
 
 int aml_secure_init(struct amlnand_chip *aml_chip)
 {
 	(void)aml_chip;
-	pr_info("amlnf_m3: aml_secure_init stub\n");
+	pr_debug("amlnf: aml_secure_init stub\n");
 	return 0;
 }
 

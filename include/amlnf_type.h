@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 
 #include "amlnf_cfg.h"
 
@@ -12,8 +13,6 @@
 #include <asm/arch/reboot.h>
 #include <asm/arch/clock.h>
 #include <linux/list.h>
-#include <asm/sizes.h>
-#include <amlogic/securitykey.h>
 #else
 #include <linux/module.h>
 #include <linux/types.h>
@@ -29,8 +28,6 @@
 #include<linux/delay.h>
 #include <linux/cdev.h>
 #include <linux/sched.h>
-#include <linux/earlysuspend.h>
-#include <mach/pinmux.h>
 #include <linux/err.h>
 #include <linux/io.h>
 #include <linux/bitops.h>
@@ -39,10 +36,8 @@
 #include <asm/uaccess.h>
 #include <linux/reboot.h>
 #include <asm/div64.h>
-#include <mach/clock.h>
+#include "amlnf_compat.h"
 #include <linux/list.h>
-#include <asm/sizes.h>
-#include <mach/am_regs.h>
 #include <linux/kthread.h>
 #include <linux/kmod.h>
 #include <linux/blkdev.h>
@@ -57,7 +52,6 @@
 #include <linux/mutex.h>
 
 #ifdef AML_NAND_RB_IRQ
-#include <mach/irqs.h>
 #include <linux/interrupt.h>
 #endif
 
@@ -70,30 +64,24 @@
 
 #endif
 
-#if MESON_CPU_TYPE >= MESON_CPU_TYPE_MESON8
-//#ifdef CONFIG_ARCH_MESON8
+/* This port drives the Meson8 / Meson8b (S805) controller only. */
 #define CONFIG_NAND_AML_M8
-#define	AML_NAND_DBG_M8
-#endif
-
-#if MESON_CPU_TYPE >= MESON_CPU_TYPE_MESON8B
-//#ifdef CONFIG_ARCH_MESON8
+#define AML_NAND_DBG_M8
 #define CONFIG_NAND_AML_M8B
-#endif
 
 //#define aml_nftl_malloc(n)		kzalloc(n, GFP_KERNEL)
 //#define aml_nftl_free			kfree
 
 
 #ifdef AML_NAND_DBG
-#define aml_nand_dbg(fmt, ...) printk( "%s: line:%d " fmt "\n", \
-				  __func__, __LINE__, ##__VA_ARGS__)
+#define aml_nand_dbg(fmt, ...) printk("%s: line:%d " fmt "\n", \
+								  __func__, __LINE__, ##__VA_ARGS__)
 
-#define aml_nand_msg(fmt, ...) printk( "%s: line:%d " fmt "\n", \
-				  __func__, __LINE__, ##__VA_ARGS__)
+#define aml_nand_msg(fmt, ...) printk("%s: line:%d " fmt "\n", \
+								  __func__, __LINE__, ##__VA_ARGS__)
 #else
-#define aml_nand_dbg(fmt, ...)
-#define aml_nand_msg(fmt, ...) printk( fmt "\n",  ##__VA_ARGS__)
+#define aml_nand_dbg(fmt, ...) no_printk(fmt, ##__VA_ARGS__)
+#define aml_nand_msg(fmt, ...) printk(fmt "\n",  ##__VA_ARGS__)
 #endif
 
 //typedef unsigned char         uchar;
@@ -102,7 +90,7 @@ typedef unsigned long         uint32;
 typedef unsigned long long	uint64;
 typedef long                  sint32;
 typedef long long              sint64;
-typedef short            	  sint16;
+typedef short		  sint16;
 
 
 

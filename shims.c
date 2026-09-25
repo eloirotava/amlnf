@@ -1,9 +1,15 @@
 // SPDX-License-Identifier: GPL-2.0
-/* Legacy symbols the FTL blob still references. */
+/*
+ * Symbols the FTL object still references by their 3.10 names.  The
+ * object is linked into this module, so nothing here is exported.
+ */
 #include <linux/kernel.h>
 #include <linux/string.h>
 
 #undef printk
+int printk(const char *fmt, ...);
+void __memzero(void *ptr, __kernel_size_t n);
+
 int printk(const char *fmt, ...)
 {
 	va_list args;
@@ -14,10 +20,8 @@ int printk(const char *fmt, ...)
 	va_end(args);
 	return r;
 }
-EXPORT_SYMBOL_GPL(printk);
 
 void __memzero(void *ptr, __kernel_size_t n)
 {
 	memset(ptr, 0, n);
 }
-EXPORT_SYMBOL_GPL(__memzero);

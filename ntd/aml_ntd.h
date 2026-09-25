@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * Copyright © 1999-2010 David Woodhouse <dwmw2@infradead.org> et al.
  *
@@ -51,51 +52,51 @@ struct ntd_blktrans_ops;
 struct ntd_blktrans_dev;
 
 struct ntd_info {
-    uint64_t offset;
-    uint64_t size;	 // Total size of the NTD
-    unsigned long flags;
-    unsigned long blocksize;
-    unsigned long pagesize;
-    unsigned long oobsize;
+	uint64_t offset;
+	uint64_t size;	 // Total size of the NTD
+	unsigned long flags;
+	unsigned long blocksize;
+	unsigned long pagesize;
+	unsigned long oobsize;
 	unsigned long blocksize_shift;
 	unsigned long pagesize_shift;
 	unsigned long blocksize_mask;
 	unsigned long pagesize_mask;
-    char *name;
-    long index;
+	char *name;
+	long index;
 
-    struct ntd_partition *parts;
-    unsigned long nr_partitions;
+	struct ntd_partition *parts;
+	unsigned long nr_partitions;
 
 	/* Backing device capabilities for this device provides mmap capabilities*/
 //	struct backing_dev_info *backing_dev_info;
 
-    int (*erase) (struct ntd_info *ntd, uint32_t block);
-    int (*read_page_with_oob) (struct ntd_info *ntd, uint32_t page, u_char *oob_buf, u_char *buf);
-    int (*write_page_with_oob) (struct ntd_info *ntd, uint32_t page, u_char *oob_buf, u_char *buf);
-    int (*read_only_oob) (struct ntd_info *ntd, u_int32_t page, u_char *oob_buf);
-    int (*block_isbad) (struct ntd_info *ntd, u_int32_t block);
-    int (*block_markbad) (struct ntd_info *ntd, u_int32_t block);
+	int (*erase)(struct ntd_info *ntd, uint32_t block);
+	int (*read_page_with_oob)(struct ntd_info *ntd, uint32_t page, u_char *oob_buf, u_char *buf);
+	int (*write_page_with_oob)(struct ntd_info *ntd, uint32_t page, u_char *oob_buf, u_char *buf);
+	int (*read_only_oob)(struct ntd_info *ntd, u_int32_t page, u_char *oob_buf);
+	int (*block_isbad)(struct ntd_info *ntd, u_int32_t block);
+	int (*block_markbad)(struct ntd_info *ntd, u_int32_t block);
 
 //    int (*lock) (struct ntd_info *ntd, loff_t ofs, size_t len);
 //    int (*unlock) (struct ntd_info *ntd, loff_t ofs, size_t len);
 //    int (*is_locked) (struct ntd_info *ntd, loff_t ofs, uint64_t len);
 //    void (*sync) (struct ntd_info *ntd);
 
-    int (*get_device) (struct ntd_info *ntd);
-    int (*put_device) (struct ntd_info *ntd);
-    int (*flush) (struct ntd_info *ntd);
-    int (*suspend) (struct ntd_info *ntd);
-    void (*resume) (struct ntd_info *ntd);
+	int (*get_device)(struct ntd_info *ntd);
+	int (*put_device)(struct ntd_info *ntd);
+	int (*flush)(struct ntd_info *ntd);
+	int (*suspend)(struct ntd_info *ntd);
+	void (*resume)(struct ntd_info *ntd);
 
-    struct notifier_block reboot_notifier;
+	struct notifier_block reboot_notifier;
 	void *priv;
 	void *nftl_priv;
 	struct module *owner;
 	struct device dev;
 	int usecount;
 	unsigned long badblocks;
-    struct list_head list;
+	struct list_head list;
 
 	/* If the driver is something smart, like UBI, it may need to maintain
 	 * its own reference counting. The below functions are only for driver.
@@ -118,8 +119,8 @@ struct ntd_partition {
 	char name[MAX_NAND_PART_NAME_LEN];			/* identifier string */
 	uint64_t size;			/* partition size */
 	uint64_t offset;		/* offset within the master space */
-	unsigned mask_flags;		/* master flags to mask out for this partition */
-	void*    priv;
+	unsigned int mask_flags;		/* master flags to mask out for this partition */
+	void *priv;
 };
 
 struct request;
@@ -135,9 +136,9 @@ struct ntd_blktrans_ops {
 	void (*update_blktrans_sysinfo)(struct ntd_blktrans_dev *dev, unsigned int cmd, unsigned long arg);
 	int (*do_blktrans_request)(struct ntd_blktrans_ops *tr, struct ntd_blktrans_dev *dev, struct request *req);			//for nftl could do much requests once a time not just 1page a time
 
-	int (*readsect)(struct ntd_blktrans_dev *dev,unsigned long block, char *buffer);
-	int (*writesect)(struct ntd_blktrans_dev *dev,unsigned long block, char *buffer);
-	int (*discard)(struct ntd_blktrans_dev *dev,unsigned long block, unsigned nr_blocks);
+	int (*readsect)(struct ntd_blktrans_dev *dev, unsigned long block, char *buffer);
+	int (*writesect)(struct ntd_blktrans_dev *dev, unsigned long block, char *buffer);
+	int (*discard)(struct ntd_blktrans_dev *dev, unsigned long block, unsigned int nr_blocks);
 	void (*background)(struct ntd_blktrans_dev *dev);
 
 	/* Block layer ioctls */
@@ -147,10 +148,10 @@ struct ntd_blktrans_ops {
 	/* Called with ntd_table_mutex held; no race with add/remove */
 	int (*open)(struct ntd_blktrans_dev *dev);
 	int (*release)(struct ntd_blktrans_dev *dev);
-	int(*wipe_part)(struct ntd_blktrans_dev *dev);
+	int (*wipe_part)(struct ntd_blktrans_dev *dev);
 
 	/* Called on {de,}registration and on subsequent addition/removal
-	   of devices, with ntd_table_mutex held. */
+		   of devices, with ntd_table_mutex held. */
 	void (*add_ntd)(struct ntd_blktrans_ops *tr, struct ntd_info *ntd);
 	void (*remove_dev)(struct ntd_blktrans_dev *dev);
 
@@ -226,14 +227,14 @@ static inline uint32_t ntd_mod_by_ws(uint64_t sz, struct ntd_info *ntd)
 
 	/* Kernel-side ioctl definitions */
 extern int add_ntd_device(struct ntd_info *ntd);
-extern int del_ntd_device (struct ntd_info *ntd);
+extern int del_ntd_device(struct ntd_info *ntd);
 
 
 struct ntd_partition;
 struct amlnand_phydev;
 extern int ntd_device_register(struct ntd_info *master,
-			       const struct ntd_partition *parts,
-			       int nr_parts);
+							   const struct ntd_partition *parts,
+							   int nr_parts);
 extern int ntd_device_unregister(struct ntd_info *master);
 extern struct ntd_info *get_ntd_device(struct ntd_info *ntd, int num);
 extern int __get_ntd_device(struct ntd_info *ntd);
@@ -250,8 +251,8 @@ extern struct ntd_info *__ntd_next_device(int i);
 
 extern int add_ntd_device(struct ntd_info *ntd);
 extern int del_ntd_device(struct ntd_info *ntd);
-extern int add_ntd_partitions(struct amlnand_phydev* master);
-extern int del_ntd_partitions(struct amlnand_phydev* master);
+extern int add_ntd_partitions(struct amlnand_phydev *master);
+extern int del_ntd_partitions(struct amlnand_phydev *master);
 extern int add_ntd_blktrans_dev(struct ntd_blktrans_dev *new);
 extern int del_ntd_blktrans_dev(struct ntd_blktrans_dev *old);
 extern int register_ntd_blktrans(struct ntd_blktrans_ops *tr);
@@ -259,8 +260,8 @@ extern int deregister_ntd_blktrans(struct ntd_blktrans_ops *tr);
 
 #define ntd_for_each_device(mtd)			\
 	for ((ntd) = __ntd_next_device(0);		\
-	     (ntd) != NULL;				\
-	     (ntd) = __ntd_next_device(ntd->index + 1))
+			 (ntd) != NULL;				\
+			 (ntd) = __ntd_next_device(ntd->index + 1))
 
 
 

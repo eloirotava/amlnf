@@ -1,3 +1,4 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 
 //#define	AML_NAND_UBOOT
 
@@ -6,15 +7,15 @@
 #define	AML_SLC_NAND_SUPPORT
 #define	AML_MLC_NAND_SUPPORT
 //#define	AML_NAND_DBG
-#define 	NEW_NAND_SUPPORT
+#define	NEW_NAND_SUPPORT
 #define AML_NAND_NEW_OOB
 
 #define NAND_ADJUST_PART_TABLE
 
 #ifdef NAND_ADJUST_PART_TABLE
-#define 	ADJUST_BLOCK_NUM	4
+#define	ADJUST_BLOCK_NUM	4
 #else
-#define 	ADJUST_BLOCK_NUM	0
+#define	ADJUST_BLOCK_NUM	0
 #endif
 
 /* Polling path (NONE_RB) — M2 proved it on this board. */

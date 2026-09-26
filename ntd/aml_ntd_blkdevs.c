@@ -13,6 +13,7 @@
 #include <linux/blkpg.h>
 #include <linux/spinlock.h>
 #include <linux/hdreg.h>
+#include <linux/version.h>
 #include <linux/mutex.h>
 #include <linux/kthread.h>
 #include <linux/delay.h>
@@ -272,9 +273,18 @@ unlock:
 	blktrans_dev_put(dev);
 }
 
+/* ->getgeo takes the gendisk itself since 6.18 */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 0)
+static int blktrans_getgeo(struct gendisk *disk, struct hd_geometry *geo)
+#else
 static int blktrans_getgeo(struct block_device *bdev, struct hd_geometry *geo)
+#endif
 {
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 18, 0)
+	struct ntd_blktrans_dev *dev = blktrans_dev_get(disk);
+#else
 	struct ntd_blktrans_dev *dev = blktrans_dev_get(bdev->bd_disk);
+#endif
 	int ret = -ENXIO;
 
 	if (!dev)
@@ -346,7 +356,10 @@ added:
 	set->nr_hw_queues = 1;
 	set->queue_depth = 16;
 	set->numa_node = NUMA_NO_NODE;
+	/* merging is the default, and the flag is gone, since 6.14 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(6, 14, 0)
 	set->flags = BLK_MQ_F_SHOULD_MERGE;
+#endif
 	ret = blk_mq_alloc_tag_set(set);
 	if (ret)
 		goto err_set;
